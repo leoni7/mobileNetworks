@@ -104,116 +104,122 @@ public class MainActivity extends AppCompatActivity {
     /**
      * A placeholder fragment containing a simple view.
      */
-    public static class PlaceholderFragment extends Fragment implements OnMapReadyCallback{
-    /**
-     * A placeholder fragment containing a simple view.
-     */
-    private static final String ARG_SECTION_NUMBER = "section_number";
+    public static class PlaceholderFragment extends Fragment implements OnMapReadyCallback {
+        /**
+         * A placeholder fragment containing a simple view.
+         */
+        private static final String ARG_SECTION_NUMBER = "section_number";
 
-    MapView mMapView;
-    GoogleMap googleMap;
-    DataManager data;
+        MapView mMapView;
+        GoogleMap googleMap;
+        DataManager data;
 
-    @TargetApi(Build.VERSION_CODES.N)
-    public PlaceholderFragment() {
-        //data = new DataManager(getActivity());
-    }
-
-    /**
-     * Returns a new instance of this fragment for the given section
-     * number.
-     */
-    public static PlaceholderFragment newInstance(int sectionNumber) {
-        PlaceholderFragment fragment = new PlaceholderFragment();
-        Bundle args = new Bundle();
-        args.putInt(ARG_SECTION_NUMBER, sectionNumber);
-        fragment.setArguments(args);
-        return fragment;
-    }
-
-    @RequiresApi(api = Build.VERSION_CODES.N)
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        data = new DataManager(container.getContext());
-        View rootView = inflater.inflate(R.layout.fragment_main, container, false);
-        TextView textView = (TextView) rootView.findViewById(R.id.section_label);
-
-        if(getArguments().getInt(ARG_SECTION_NUMBER) == 1) {
-
-
-            TextView l1 = (TextView) rootView.findViewById(R.id.label1);
-
-            l1.setText("Serial number: \n  " + data.getSerial());
-            TextView l2 = (TextView) rootView.findViewById(R.id.label2);
-            l2.setText("CountryCode: \n " + data.getCountryCode());
-            TextView l3 = (TextView) rootView.findViewById(R.id.label3);
-            l3.setText("Sim operator name: \n " + data.getOperatorNumber());
-            TextView l4 = (TextView) rootView.findViewById(R.id.label4);
-            l4.setText("Network type: \n " + data.getDataNetworkType());
-            TextView l5 = (TextView) rootView.findViewById(R.id.label5);
-            l5.setText("Network type for voice calls: \n " + data.getVoiceCallType());
-
-            //ListView
-            ArrayAdapter<String> listAdapter = new ArrayAdapter<String>(container.getContext(),R.layout.list_item,R.id.list_item_textView,data.getCellIds());
-
-            ListView listview = (ListView) rootView.findViewById(R.id.listView);
-            listview.setAdapter(listAdapter);
-            listview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                @Override
-                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-
-                    String value = (String) parent.getItemAtPosition(position);
-                    final Dialog dialog = new Dialog(view.getContext());
-                    dialog.setContentView(R.layout.custom_dialog);
-                    dialog.setTitle("Cell Info");
-                    ListView info = dialog.findViewById(R.id.List_Content);
-                    ArrayAdapter<String> adapter = new ArrayAdapter(view.getContext(), R.layout.cellinfo_view, data.getCellInfos().get(position));
-                    info.setAdapter(adapter);
-                    dialog.show();
-
-                }
-            });
-
-        }else if (getArguments().getInt(ARG_SECTION_NUMBER) == 2){
-            TextView l1 = (TextView) rootView.findViewById(R.id.label1);
-            l1.clearComposingText();
-            l1.setText("Type \n" + data.getType());
-            TextView l2 = (TextView) rootView.findViewById(R.id.label2);
-            l2.setText("Roaming \n" + data.isRoaming());
-            TextView l3 = (TextView) rootView.findViewById(R.id.label3);
-            l3.setText("Active state \n" + data.getActiveState());
-            TextView l4 = (TextView) rootView.findViewById(R.id.label4);
-            l3.setText("Downstream bandwidth \n" + data.getBandwidth_down());
-            TextView l5 = (TextView) rootView.findViewById(R.id.label5);
-            l4.setText("Upstream bandwidth \n" + data.getBandwidth_up());
-
-            TextView l6 = (TextView) rootView.findViewById(R.id.label6);
-            l6.setText("Interface name:  \n" + data.getInterfaceName());
-
-        }else if(getArguments().getInt(ARG_SECTION_NUMBER) == 3) {
-
-            mMapView = (MapView) rootView.findViewById(R.id.mapView);
-
-            if (mMapView != null) {
-                mMapView.onCreate(new Bundle());
-
-
-                mMapView.onResume(); // needed to get the map to display immediately
-
-                try {
-                    MapsInitializer.initialize(getActivity().getApplicationContext());
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-
-
-                mMapView.getMapAsync(this);
-            }
+        @TargetApi(Build.VERSION_CODES.N)
+        public PlaceholderFragment() {
+            //data = new DataManager(getActivity());
         }
 
-        return rootView;
-    }
+        /**
+         * Returns a new instance of this fragment for the given section
+         * number.
+         */
+        public static PlaceholderFragment newInstance(int sectionNumber) {
+            PlaceholderFragment fragment = new PlaceholderFragment();
+            Bundle args = new Bundle();
+            args.putInt(ARG_SECTION_NUMBER, sectionNumber);
+            fragment.setArguments(args);
+            return fragment;
+        }
+
+        @RequiresApi(api = Build.VERSION_CODES.N)
+        @Override
+        public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                                 Bundle savedInstanceState) {
+            data = new DataManager(container.getContext());
+            View rootView = inflater.inflate(R.layout.fragment_main, container, false);
+            TextView textView = (TextView) rootView.findViewById(R.id.section_label);
+
+            if (getArguments().getInt(ARG_SECTION_NUMBER) == 1) {
+
+
+                TextView l1 = (TextView) rootView.findViewById(R.id.label1);
+
+                l1.setText("Serial number: \n  " + data.getSerial());
+                TextView l2 = (TextView) rootView.findViewById(R.id.label2);
+                l2.setText("CountryCode: \n " + data.getCountryCode());
+                TextView l3 = (TextView) rootView.findViewById(R.id.label3);
+                l3.setText("Sim operator name: \n " + data.getOperatorNumber());
+                TextView l4 = (TextView) rootView.findViewById(R.id.label4);
+                l4.setText("Network type: \n " + data.getDataNetworkType());
+                TextView l5 = (TextView) rootView.findViewById(R.id.label5);
+                l5.setText("Network type for voice calls: \n " + data.getVoiceCallType());
+
+                //ListView
+                ArrayAdapter<String> listAdapter = new ArrayAdapter<String>(container.getContext(), R.layout.list_item, R.id.list_item_textView, data.getCellIds());
+
+                ListView listview = (ListView) rootView.findViewById(R.id.listView);
+                listview.setAdapter(listAdapter);
+                listview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                    @Override
+                    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+
+                        String value = (String) parent.getItemAtPosition(position);
+                        final Dialog dialog = new Dialog(view.getContext());
+                        dialog.setContentView(R.layout.custom_dialog);
+                        dialog.setTitle("Cell Info");
+                        ListView info = dialog.findViewById(R.id.List_Content);
+                        ArrayAdapter<String> adapter = new ArrayAdapter(view.getContext(), R.layout.cellinfo_view, data.getCellInfos().get(position));
+                        info.setAdapter(adapter);
+                        dialog.show();
+
+                    }
+                });
+
+                return rootView;
+
+            } else if (getArguments().getInt(ARG_SECTION_NUMBER) == 2) {
+                TextView l1 = (TextView) rootView.findViewById(R.id.label1);
+                l1.clearComposingText();
+                l1.setText("Type \n" + data.getType());
+                TextView l2 = (TextView) rootView.findViewById(R.id.label2);
+                l2.setText("Roaming \n" + data.isRoaming());
+                TextView l3 = (TextView) rootView.findViewById(R.id.label3);
+                l3.setText("Active state \n" + data.getActiveState());
+                TextView l4 = (TextView) rootView.findViewById(R.id.label4);
+                l3.setText("Downstream bandwidth \n" + data.getBandwidth_down());
+                TextView l5 = (TextView) rootView.findViewById(R.id.label5);
+                l4.setText("Upstream bandwidth \n" + data.getBandwidth_up());
+
+                TextView l6 = (TextView) rootView.findViewById(R.id.label6);
+                l6.setText("Interface name:  \n" + data.getInterfaceName());
+
+                return rootView;
+
+            } else if (getArguments().getInt(ARG_SECTION_NUMBER) == 3) {
+
+                rootView = inflater.inflate(R.layout.map_view, container, false);
+                mMapView = (MapView) rootView.findViewById(R.id.mapView);
+
+                if (mMapView != null) {
+                    mMapView.onCreate(new Bundle());
+
+
+                    mMapView.onResume(); // needed to get the map to display immediately
+
+                    try {
+                        MapsInitializer.initialize(getActivity().getApplicationContext());
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+
+
+                    mMapView.getMapAsync(this);
+                }
+
+            }
+
+            return rootView;
+        }
 
     @Override
     public void onMapReady(GoogleMap mMap) {
