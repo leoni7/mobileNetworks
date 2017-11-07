@@ -59,9 +59,9 @@ public class DataManager {
 
 
 
-    int baseStationLat;
-    int baseStationLon;
-    int baseStationId;
+    private int baseStationLat = 0;
+    private int baseStationLon = 0;
+    private int baseStationId = 0;
     @android.support.annotation.RequiresApi(api = Build.VERSION_CODES.N)
     public DataManager(Context con){
 
@@ -169,11 +169,6 @@ public class DataManager {
                     baseStationId = location.getBaseStationId();
                     baseStationLat = location.getBaseStationLatitude();
                     baseStationLon = location.getBaseStationLongitude();
-                } else {
-                    //default value
-                    baseStationId = 0;
-                    baseStationLat = 0;
-                    baseStationLon = 0;
                 }
             } catch (Exception e1) {
                 List<String> strings = new ArrayList<String>();
@@ -181,9 +176,9 @@ public class DataManager {
                 cellInfos.add(strings);
             }
         }
-
-        serial = Settings.Secure.getString(con.getContentResolver(),
-                Settings.Secure.ANDROID_ID);
+        serial = telMan.getSimSerialNumber();
+        //serial = Settings.Secure.getString(con.getContentResolver(),
+        //        Settings.Secure.ANDROID_ID);
         countryCode = telMan.getNetworkCountryIso();
         operatorNumber = telMan.getNetworkOperatorName();
         dataNetworkType = telMan.getNetworkType();
@@ -216,12 +211,6 @@ public class DataManager {
             type = "no active network available";
         }
 
-
-
-
-        /*NetworkCapabilities capa = connMan.getNetworkCapabilities();
-        bandwidth_down = Integer.toString(capa.getLinkDownstreamBandwidthKbps()) + " kbps";
-        bandwidth_up = Integer.toString(capa.getLinkUpstreamBandwidthKbps()) + " kbps";*/
     }
 
     public String getSerial() {
