@@ -14,6 +14,7 @@ import android.os.Build;
 import android.provider.Settings;
 import android.telephony.CellIdentityCdma;
 import android.telephony.CellIdentityGsm;
+import android.telephony.CellIdentityWcdma;
 import android.telephony.CellInfo;
 import android.telephony.CellInfoCdma;
 import android.telephony.CellInfoGsm;
@@ -67,6 +68,9 @@ public class DataManager {
         telMan = (TelephonyManager) con.getSystemService(Context.TELEPHONY_SERVICE);
         connMan = (ConnectivityManager) con.getSystemService(Context.CONNECTIVITY_SERVICE);
 
+        cellInfos = new ArrayList<List<String>>();
+        cellIds = new ArrayList<String>();
+
         TelephoneInfo(con);
         ConnectivityInfo();
 
@@ -76,72 +80,107 @@ public class DataManager {
     private void TelephoneInfo(Context con){
 
         //if no cdma cell = location, location listener and via gps last seen location
-        if(telMan.getAllCellInfo() != null){
+        boolean depricated_function = true;
+        try{
             List<CellInfo> infos  = telMan.getAllCellInfo();
+            depricated_function = false;
             for(CellInfo info_cell : infos){
 
                 if(info_cell instanceof CellInfoCdma){
 
-                    CellInfoCdma registered = (CellInfoCdma) info_cell;
-                    CellIdentityCdma cellIdentity = registered.getCellIdentity();
-                    baseStationLon = cellIdentity.getLongitude();
-                    baseStationLat = cellIdentity.getLatitude();
-                    baseStationId = cellIdentity.getBasestationId();
+                    if(info_cell.isRegistered()) {
+                        CellInfoCdma registered = (CellInfoCdma) info_cell;
+                        CellIdentityCdma cellIdentity = registered.getCellIdentity();
+                        baseStationLon = cellIdentity.getLongitude();
+                        baseStationLat = cellIdentity.getLatitude();
+                        baseStationId = cellIdentity.getBasestationId();
+                    }else{
+                        CellInfoCdma registered = (CellInfoCdma) info_cell;
+                        CellIdentityCdma cellIdentity = registered.getCellIdentity();
+                        List<String> strings = new ArrayList<String>();
+                        strings.add("CDMA");
+                        strings.add(Integer.toString(cellIdentity.getLongitude()));
+                        strings.add(Integer.toString(cellIdentity.getLatitude()));
+                        strings.add(Integer.toString( cellIdentity.getBasestationId()));
+                    }
 
-                    cellIds.add("CDMA ");
+                    cellIds.add("CDMA");
 
                 }else if(info_cell instanceof CellInfoGsm){
                     CellInfoGsm gsm = (CellInfoGsm) info_cell;
                     CellIdentityGsm id_gsm = (CellIdentityGsm) ((CellInfoGsm) info_cell).getCellIdentity();
 
                     List<String> strings = new ArrayList<String>();
+                    strings.add("GSM");
                     strings.add(Integer.toString(id_gsm.getCid()));
                     strings.add(Integer.toString(id_gsm.getLac()));
-                    strings.add(Integer.toString(id_gsm.getBsic()));
+                    strings.add(Integer.toString(id_gsm.getMnc()));
 
                     cellInfos.add(strings);
 
-                    cellIds.add("GSM ");
+                    cellIds.add("GSM " + Integer.toString(id_gsm.getCid()) + Integer.toString(id_gsm.getLac()) + Integer.toString(id_gsm.getMnc()));
 
 
                 }else if(info_cell instanceof CellInfoLte){
                     CellInfoLte lte = (CellInfoLte) info_cell;
                     cellIds.add("LTE");
+                    cellInfos.add(new ArrayList<String>(){{add("not defined yet");}});
                     //not defined yet
 
                     cellInfos.add(new ArrayList<String>(){{add("not defined yet");}});
                 }else if(info_cell instanceof CellInfoWcdma){
                     CellInfoWcdma wcdma = (CellInfoWcdma) info_cell;
+                    CellIdentityWcdma id_wcdma = wcdma.getCellIdentity();
+                    List<String> strings = new ArrayList<String>();
+
+                    strings.add(Integer.toString(id_wcdma.getCid()));
+                    strings.add(Integer.toString(id_wcdma.getLac()));
+                    strings.add(Integer.toString(id_wcdma.getMnc()));
+
+                    cellIds.add(id_wcdma.toString());
                     cellInfos.add(new ArrayList<String>(){{add("not defined yet");}});
                     //not defined yet
+                }else{
+                    //no cells
+                    cellIds.add("no cells");
+                    cellInfos.add(new ArrayList<String>(){{add("no information");}});
                 }
             }
-        }else{
-            List<NeighboringCellInfo> infos = telMan.getNeighboringCellInfo();
-
-            for(int i = 0; i < infos.size(); i++){
-
-                List<String> strings = new ArrayList<String>();
-                strings.add("Cid: " + Integer.toString( infos.get(i).getCid()));
-                strings.add("Lac: " +Integer.toString(infos.get(i).getLac()));
-                strings.add("Psc: " +Integer.toString(infos.get(i).getPsc()));
-                //add more
-
-            }
-
-            CdmaCellLocation location = (CdmaCellLocation) telMan.getCellLocation();
-            if(location != null) {
-                baseStationId = location.getBaseStationId();
-                baseStationLat = location.getBaseStationLatitude();
-                baseStationLon = location.getBaseStationLongitude();
-            }else{
-                //default value
-                baseStationId = 0;
-                baseStationLat = 0;
-                baseStationLon = 0;
-            }
+        }catch(Exception e){
+            System.out.println(e.toString());
         }
 
+        if(depricated_function == true) {
+            try {
+                List<NeighboringCellInfo> infos = telMan.getNeighboringCellInfo();
+
+                for (int i = 0; i < infos.size(); i++) {
+
+                    List<String> strings = new ArrayList<String>();
+                    strings.add("Cid: " + Integer.toString(infos.get(i).getCid()));
+                    strings.add("Lac: " + Integer.toString(infos.get(i).getLac()));
+                    strings.add("Psc: " + Integer.toString(infos.get(i).getPsc()));
+                    //add more
+
+                }
+
+                CdmaCellLocation location = (CdmaCellLocation) telMan.getCellLocation();
+                if (location != null) {
+                    baseStationId = location.getBaseStationId();
+                    baseStationLat = location.getBaseStationLatitude();
+                    baseStationLon = location.getBaseStationLongitude();
+                } else {
+                    //default value
+                    baseStationId = 0;
+                    baseStationLat = 0;
+                    baseStationLon = 0;
+                }
+            } catch (Exception e1) {
+                List<String> strings = new ArrayList<String>();
+                strings.add("no cell information available! ");
+                cellInfos.add(strings);
+            }
+        }
 
         serial = Settings.Secure.getString(con.getContentResolver(),
                 Settings.Secure.ANDROID_ID);
@@ -155,24 +194,30 @@ public class DataManager {
 
     @TargetApi(Build.VERSION_CODES.M)
     public void ConnectivityInfo() {
-        NetworkInfo info = connMan.getActiveNetworkInfo();
-        type = info.getTypeName();
+        try {
+            NetworkInfo info = connMan.getActiveNetworkInfo();
+            type = info.getTypeName();
 
-        isAvailable = info.isAvailable();
-        roaming = info.isRoaming();
-        activeState = info.getDetailedState().toString();
-        wifi = Integer.toString(connMan.TYPE_WIFI);
+            isAvailable = info.isAvailable();
+            roaming = info.isRoaming();
+            activeState = info.getDetailedState().toString();
+            wifi = Integer.toString(connMan.TYPE_WIFI);
 
+            for(int i = 0; i < connMan.getAllNetworks().length; i++){
+                Network[] actives = connMan.getAllNetworks();
+                Network active = actives[i];
+                NetworkCapabilities capa = connMan.getNetworkCapabilities(active);
+                bandwidth_down = Integer.toString(capa.getLinkDownstreamBandwidthKbps()) + " kbps";
+                bandwidth_up = Integer.toString(capa.getLinkUpstreamBandwidthKbps()) + " kbps";
 
-        for(int i = 0; i < connMan.getAllNetworks().length; i++){
-            Network[] actives = connMan.getAllNetworks();
-            Network active = actives[i];
-            NetworkCapabilities capa = connMan.getNetworkCapabilities(active);
-            bandwidth_down = Integer.toString(capa.getLinkDownstreamBandwidthKbps()) + " kbps";
-            bandwidth_up = Integer.toString(capa.getLinkUpstreamBandwidthKbps()) + " kbps";
-
-            interfaceName = connMan.getLinkProperties(active).getInterfaceName();
+                interfaceName = connMan.getLinkProperties(active).getInterfaceName();
+            }
+        }catch(Exception e){
+            type = "no active network available";
         }
+
+
+
 
         /*NetworkCapabilities capa = connMan.getNetworkCapabilities();
         bandwidth_down = Integer.toString(capa.getLinkDownstreamBandwidthKbps()) + " kbps";
@@ -188,6 +233,9 @@ public class DataManager {
     }
 
     public String getCountryCode() {
+        if(countryCode.isEmpty()){
+            countryCode = "not available";
+        }
         return countryCode;
     }
 

@@ -1,12 +1,16 @@
 package com.example.leoni.telephoneinfos;
 
+import android.Manifest;
 import android.annotation.TargetApi;
 import android.app.Dialog;
+import android.content.pm.PackageManager;
 import android.os.Build;
 import android.support.annotation.RequiresApi;
 import android.support.design.widget.TabLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 
@@ -52,6 +56,7 @@ public class MainActivity extends AppCompatActivity {
      * The {@link ViewPager} that will host the section contents.
      */
     private ViewPager mViewPager;
+    int MY_PERMISSION_REQUEST_LOCATION;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,15 +75,6 @@ public class MainActivity extends AppCompatActivity {
 
         TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
         tabLayout.setupWithViewPager(mViewPager);
-
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
 
     }
 
@@ -108,7 +104,7 @@ public class MainActivity extends AppCompatActivity {
     /**
      * A placeholder fragment containing a simple view.
      */
-    public static class PlaceholderFragment extends Fragment implements OnMapReadyCallback {
+    public static class PlaceholderFragment extends Fragment implements OnMapReadyCallback{
     /**
      * A placeholder fragment containing a simple view.
      */
@@ -145,28 +141,18 @@ public class MainActivity extends AppCompatActivity {
 
         if(getArguments().getInt(ARG_SECTION_NUMBER) == 1) {
 
-                /*List<String> values = new ArrayList<>();
-                values.add(data.getSerial());
-                values.add(data.getCountryCode());
-                values.add(data.getOperatorNumber());
-                values.add(Integer.toString(data.getDataNetworkType()));
-
-                ArrayAdapter<String> listAdapter = new ArrayAdapter<String>(container.getContext(),R.layout.list_item,R.id.list_item_textView,values);
-
-                ListView listview = (ListView) rootView.findViewById(R.id.listView);
-                listview.setAdapter(listAdapter);*/
 
             TextView l1 = (TextView) rootView.findViewById(R.id.label1);
 
-            l1.setText("Serial number:  " + data.getSerial());
+            l1.setText("Serial number: \n  " + data.getSerial());
             TextView l2 = (TextView) rootView.findViewById(R.id.label2);
-            l2.setText("CountryCode:  " + data.getCountryCode());
+            l2.setText("CountryCode: \n " + data.getCountryCode());
             TextView l3 = (TextView) rootView.findViewById(R.id.label3);
-            l3.setText("Sim operator name:  " + data.getOperatorNumber());
+            l3.setText("Sim operator name: \n " + data.getOperatorNumber());
             TextView l4 = (TextView) rootView.findViewById(R.id.label4);
-            l4.setText("Network type:  " + data.getDataNetworkType());
+            l4.setText("Network type: \n " + data.getDataNetworkType());
             TextView l5 = (TextView) rootView.findViewById(R.id.label5);
-            l5.setText("Network type for voice calls:  " + data.getVoiceCallType());
+            l5.setText("Network type for voice calls: \n " + data.getVoiceCallType());
 
             //ListView
             ArrayAdapter<String> listAdapter = new ArrayAdapter<String>(container.getContext(),R.layout.list_item,R.id.list_item_textView,data.getCellIds());
@@ -181,7 +167,7 @@ public class MainActivity extends AppCompatActivity {
                     final Dialog dialog = new Dialog(view.getContext());
                     dialog.setContentView(R.layout.custom_dialog);
                     dialog.setTitle("Cell Info");
-                    ListView info = (ListView) dialog.findViewById(R.id.List_Content);
+                    ListView info = dialog.findViewById(R.id.List_Content);
                     ArrayAdapter<String> adapter = new ArrayAdapter(view.getContext(), R.layout.cellinfo_view, data.getCellInfos().get(position));
                     info.setAdapter(adapter);
                     dialog.show();
@@ -194,7 +180,7 @@ public class MainActivity extends AppCompatActivity {
             l1.clearComposingText();
             l1.setText("Type \n" + data.getType());
             TextView l2 = (TextView) rootView.findViewById(R.id.label2);
-            l2.setText("Roaming \n" + data.getWifi());
+            l2.setText("Roaming \n" + data.isRoaming());
             TextView l3 = (TextView) rootView.findViewById(R.id.label3);
             l3.setText("Active state \n" + data.getActiveState());
             TextView l4 = (TextView) rootView.findViewById(R.id.label4);
@@ -203,12 +189,12 @@ public class MainActivity extends AppCompatActivity {
             l4.setText("Upstream bandwidth \n" + data.getBandwidth_up());
 
             TextView l6 = (TextView) rootView.findViewById(R.id.label6);
-            l6.setText("Interface name: " + data.getInterfaceName());
+            l6.setText("Interface name:  \n" + data.getInterfaceName());
 
         }else if(getArguments().getInt(ARG_SECTION_NUMBER) == 3) {
 
             mMapView = (MapView) rootView.findViewById(R.id.mapView);
-            //savedInstanceState is null
+
             if (mMapView != null) {
                 mMapView.onCreate(new Bundle());
 
@@ -226,7 +212,6 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
-        //textView.setText(getString(R.string.section_format, getArguments().getInt(ARG_SECTION_NUMBER)));
         return rootView;
     }
 
@@ -247,7 +232,7 @@ public class MainActivity extends AppCompatActivity {
         googleMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
     }
 
-
+/*
     @Override
     public void onResume() {
         super.onResume();
@@ -270,7 +255,7 @@ public class MainActivity extends AppCompatActivity {
     public void onLowMemory() {
         super.onLowMemory();
         mMapView.onLowMemory();
-    }
+    }*/
     }
 
     /**
@@ -300,11 +285,11 @@ public class MainActivity extends AppCompatActivity {
         public CharSequence getPageTitle(int position) {
             switch (position) {
                 case 0:
-                    return "SECTION 1";
+                    return "Telephony";
                 case 1:
-                    return "SECTION 2";
+                    return "Connectivity";
                 case 2:
-                    return "SECTION 3";
+                    return "Map";
             }
             return null;
         }
